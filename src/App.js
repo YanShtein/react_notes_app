@@ -1,116 +1,13 @@
 import { useState } from 'react';
-import { editSvg, deleteSvg, saveSvg, addSvg } from './svg';
+import { addSvg, lightSvg, darkSvg } from './assets/svg';
+import Notes from './components/Notes';
 const shortid = require('shortid');
 
 
-function Note({ id, title, body, footer, handleChange, handleDelete }) {
-  const [isEditing, setIsEditing] = useState(false);
-  
-  let content;
-  if (isEditing) {
-    content = (
-      <div className='note'>
-        <div className='svg' onClick={() => setIsEditing(false)}>
-          {saveSvg}
-        </div>
-        <div className='note_title'>
-          <textarea 
-            name='title'
-            value={title}
-            placeholder="Take a note..."
-            onChange={e => handleChange(e, id)}
-          />
-        </div>
-        <div className='note_description'>
-          <textarea 
-            name='body'
-            value={body}
-            placeholder="Note"
-            onChange={e => handleChange(e, id)}
-          />
-        </div>
-        <div className='note_footer'>
-          <span>Edited</span>
-          <span>{footer}</span>
-        </div>
-      </div>
-    )
-  } else {
-    content = (
-      <div className='note' onClick={() => setIsEditing(true)}>
-        <div className='svg'>
-          {editSvg}
-        </div>
-        <div className='note_title'>
-          <span>{title.length === 0 ? 'Take a note...' : title}</span>
-        </div>
-        <div className='note_description'>
-          <span>{body}</span>
-        </div>
-        <div className='note_footer'>
-          <span>Edited</span>
-          <span>{footer}</span>
-          <div onClick={() => handleDelete(id)}>
-            {deleteSvg}
-          </div>
-        </div>
-      </div>
-    )
-  };
-
-  return (
-    <>
-      {content}
-    </>
-  )
-}
-
-function Notes({ notes, setNotes }) {
-
-  function handleChange(e, id) {
-    setNotes(
-      notes.map(note => {
-        if (note.id === id) {
-          return {
-            ...note,
-            [e.target.name]: e.target.value,
-            footer: new Date().toLocaleString(),
-          };
-        }
-        return note;
-      })
-    );
-  };
-
-  function handleDelete(id) {
-    const removeNote = notes.filter(note => note.id !== id)
-    setNotes(removeNote)
-    console.log(removeNote)
-  }
-
-  return (
-    <div className='notes'>
-      {
-        notes.map(note => {
-          return (
-            <Note 
-              key={note.id}
-              id={note.id}
-              title={note.title}
-              body={note.body}
-              footer={note.footer}
-              handleChange={handleChange}
-              handleDelete={handleDelete}
-            />
-          )
-        })
-      }
-    </div>
-  )
-}
-
 function App() {
   const [notes, setNotes] = useState([]);
+  const [search, setSearch] = useState('');
+  const [theme, setTheme] = useState('light');
 
   function addEmptyNote() {
     setNotes([
@@ -124,16 +21,29 @@ function App() {
     ])
   };
 
+  function changeTheme() {
+    if (theme === 'light') {
+      setTheme('dark')
+    } else {
+      setTheme('light')
+    }
+  }
+  let themeClass = theme === 'light' ? 'theme_light' : 'theme_dark';
+  let svgColor = theme === 'light' ? {color: 'black'} : {color: 'white'};
+
   return (
-    <div className="container">
+    <div className={`container ${themeClass}`}>
       <div className='header'>
         <div className='search'>
           Search
-          <input />
+          <input value={search} onChange={e => setSearch(e.target.value)}/>
         </div>
         <div className='add_note'>
           <p>Add new note!</p>
-          <button onClick={addEmptyNote}>{addSvg}</button>
+          <button style={svgColor} onClick={addEmptyNote}>{addSvg}</button>
+        </div>
+        <div className='theme_btn'>
+          <button onClick={changeTheme} type='button'>{theme === 'light' ? darkSvg : lightSvg}</button>
         </div>
       </div>
       {
@@ -141,10 +51,12 @@ function App() {
         (
           <div className='add_note'>
             <p>Add new note!</p>
-            <button onClick={addEmptyNote}>{addSvg}</button>
+            <button style={svgColor} type='button' onClick={addEmptyNote}>
+              {addSvg}
+            </button>
           </div>
         ) :
-        <Notes notes={notes} setNotes={setNotes} />
+        <Notes notes={notes} setNotes={setNotes} search={search} svgColor={svgColor}/>
       }
       {console.log(notes)}
     </div>
