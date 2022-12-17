@@ -1,65 +1,67 @@
 import { useState } from 'react';
-import { editSvg, deleteSvg } from './svg';
+import { editSvg, deleteSvg, saveSvg, addSvg } from './svg';
 const shortid = require('shortid');
 
-function Note({ id, title, body, footer, handleChange }) {
+
+function Note({ id, title, body, footer, handleChange, handleDelete }) {
   const [isEditing, setIsEditing] = useState(false);
   
   let content;
   if (isEditing) {
     content = (
-      <>
+      <div className='note'>
+        <div className='svg' onClick={() => setIsEditing(false)}>
+          {saveSvg}
+        </div>
         <div className='note_title'>
-          <button onClick={() => setIsEditing(false)}>
-            save
-          </button>
-          <input 
+          <textarea 
             name='title'
             value={title}
+            placeholder="Take a note..."
             onChange={e => handleChange(e, id)}
           />
         </div>
         <div className='note_description'>
-          <input 
+          <textarea 
             name='body'
             value={body}
+            placeholder="Note"
             onChange={e => handleChange(e, id)}
           />
         </div>
         <div className='note_footer'>
+          <span>Edited</span>
           <span>{footer}</span>
-          <div>
-            {deleteSvg}
-          </div>
         </div>
-      </>
+      </div>
     )
   } else {
     content = (
-      <>
+      <div className='note' onClick={() => setIsEditing(true)}>
+        <div className='svg'>
+          {editSvg}
+        </div>
         <div className='note_title'>
-          <span>{title}</span>
-          <div onClick={() => setIsEditing(true)}>
-            {editSvg}
-          </div>
+          <span>{title.length === 0 ? 'Take a note...' : title}</span>
         </div>
         <div className='note_description'>
           <span>{body}</span>
         </div>
         <div className='note_footer'>
+          <span>Edited</span>
           <span>{footer}</span>
-          <div>
+          <div onClick={() => handleDelete(id)}>
             {deleteSvg}
           </div>
         </div>
-      </>
+      </div>
     )
   };
 
   return (
-    <div className='note'>
+    <>
       {content}
-    </div>
+    </>
   )
 }
 
@@ -72,11 +74,18 @@ function Notes({ notes, setNotes }) {
           return {
             ...note,
             [e.target.name]: e.target.value,
+            footer: new Date().toLocaleString(),
           };
         }
         return note;
       })
     );
+  };
+
+  function handleDelete(id) {
+    const removeNote = notes.filter(note => note.id !== id)
+    setNotes(removeNote)
+    console.log(removeNote)
   }
 
   return (
@@ -91,6 +100,7 @@ function Notes({ notes, setNotes }) {
               body={note.body}
               footer={note.footer}
               handleChange={handleChange}
+              handleDelete={handleDelete}
             />
           )
         })
@@ -100,30 +110,42 @@ function Notes({ notes, setNotes }) {
 }
 
 function App() {
-  const [notes, setNotes] = useState([{
-    id: 0,
-    title: 'Take a note...',
-    body: 'buy a shirt this weekend',
-    footer: new Date().toLocaleString(),
-    edit: false,
-  }]);
+  const [notes, setNotes] = useState([]);
 
   function addEmptyNote() {
-    // adds empty note
     setNotes([
-      {id: shortid.generate()},
+      {    
+        id: shortid.generate(),
+        title: '',
+        body: '',
+        footer: new Date().toLocaleString(),
+      },
       ...notes,
     ])
   };
 
   return (
     <div className="container">
-      <div className='search'>
-        Search
-        <input />
-        <button onClick={addEmptyNote}>Add</button>
+      <div className='header'>
+        <div className='search'>
+          Search
+          <input />
+        </div>
+        <div className='add_note'>
+          <p>Add new note!</p>
+          <button onClick={addEmptyNote}>{addSvg}</button>
+        </div>
       </div>
-      <Notes notes={notes} setNotes={setNotes}/>
+      {
+        notes.length === 0 ?
+        (
+          <div className='add_note'>
+            <p>Add new note!</p>
+            <button onClick={addEmptyNote}>{addSvg}</button>
+          </div>
+        ) :
+        <Notes notes={notes} setNotes={setNotes} />
+      }
       {console.log(notes)}
     </div>
   );
