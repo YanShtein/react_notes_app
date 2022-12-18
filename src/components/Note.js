@@ -15,6 +15,7 @@ function Note({ id, title, body, footer, handleChange, handleDelete, svgColor })
         </div>
         <div className='note_title'>
           <textarea 
+            style={svgColor}
             name='title'
             value={title}
             placeholder="Take a note..."
@@ -23,6 +24,7 @@ function Note({ id, title, body, footer, handleChange, handleDelete, svgColor })
         </div>
         <div className='note_description'>
           <textarea 
+            style={svgColor}
             name='body'
             value={body}
             placeholder="Note"
