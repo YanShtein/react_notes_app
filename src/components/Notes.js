@@ -11,6 +11,7 @@ function Notes({ notes, setNotes, search, svgColor }) {
             ...note,
             [e.target.name]: e.target.value,
             footer: new Date().toLocaleString(),
+            edited: true,
           };
         }
         return note;
@@ -19,7 +20,8 @@ function Notes({ notes, setNotes, search, svgColor }) {
   };
 
   const handleDelete = (id) => {
-    const removeNote = notes.filter(note => note.id !== id)
+    const removeNote = notes.filter(note => note.id !== id);
+    localStorage.removeItem('Tasks', removeNote);
     setNotes(removeNote);
   };
 
@@ -34,6 +36,7 @@ function Notes({ notes, setNotes, search, svgColor }) {
               title={note.title}
               body={note.body}
               footer={note.footer}
+              edited={note.edited}
               handleChange={handleChange}
               handleDelete={handleDelete}
               svgColor={svgColor}

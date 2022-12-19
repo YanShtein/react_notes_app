@@ -1,48 +1,41 @@
-import { useState } from 'react';
-import { addSvg, lightSvg, darkSvg } from './assets/svg';
+import { useEffect, useState } from 'react';
+import { lightSvg, darkSvg, notesSvg } from './assets/svg';
 import Notes from './components/Notes';
+import useTheme from './components/useTheme';
 const shortid = require('shortid');
 
 
 function App() {
   const [notes, setNotes] = useState([]);
   const [search, setSearch] = useState('');
-  const [theme, setTheme] = useState('light');
+  const { changeTheme, themeClass, svgColor, theme } = useTheme();
 
   function addEmptyNote() {
-    let newNote = {
+    const newNote = {
       id: shortid.generate(),
       title: '',
       body: '',
-      footer: new Date().toLocaleString(),
+      edited: false,
     }
     setNotes([
-      newNote,
+      {...newNote}, 
       ...notes,
-    ])
-    let isNoteEmpty = notes.map(note => {
-      if (note.title.length === 0 || note.body.length === 0) {
-        alert('Note is empty!')
-        return 'empty';
-      } else {
-        setNotes([
-          newNote,
-          ...notes,
-        ])
-      }
-    })
-    console.log(isNoteEmpty)
+    ]);
   };
 
-  function changeTheme() {
-    if (theme === 'light') {
-      setTheme('dark')
-    } else {
-      setTheme('light')
-    }
-  }
-  let themeClass = theme === 'light' ? 'theme_light' : 'theme_dark';
-  let svgColor = theme === 'light' ? {color: 'black'} : {color: 'white'};
+  useEffect(() => {
+    if (notes.length > 0) {
+      localStorage.setItem('Tasks', JSON.stringify(notes))
+    }; // saving to localStorage
+  }, [notes]); // re-render when notes state changes
+
+  
+  useEffect(() => {
+    const localItems = JSON.parse(localStorage.getItem('Tasks'));
+    if (localItems) {
+      setNotes(localItems);
+    }; // get from localStorage
+  }, []);
 
   return (
     <div className={`container ${themeClass}`}>
@@ -61,34 +54,29 @@ function App() {
             style={svgColor}
             placeholder='Search notes...'
             value={search} 
-            onChange={e => setSearch(e.target.value)}
-          />
-          <div className='add_note'>
-            <button 
-              style={svgColor} 
-              onClick={addEmptyNote}>{addSvg}
-            </button>
-          </div>
+            onChange={e => setSearch(e.target.value)}/>
+        </div>
+        <div className='add_note'>
+          <button 
+            onClick={addEmptyNote}
+            >Add note
+          </button>
         </div>
       </div>
       {
-        notes.length === 0 ?
-        (
-          <div className='add_note'>
-            <p>Add new note!</p>
-            <button style={svgColor} type='button' onClick={addEmptyNote}>
-              {addSvg}
-            </button>
-          </div>
-        ) :
-        <Notes 
-          notes={notes} 
-          setNotes={setNotes} 
-          search={search} 
-          svgColor={svgColor}
-        />
+        notes.length === 0 ? 
+          <div className='done'>
+            <p>{notesSvg}</p>
+            <p> All Done!</p>
+          </div>  
+          :
+          <Notes 
+            notes={notes} 
+            setNotes={setNotes} 
+            search={search} 
+            svgColor={svgColor}
+          />
       }
-      {console.log(notes)}
     </div>
   );
 };

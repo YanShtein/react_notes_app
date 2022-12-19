@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { editSvg, deleteSvg, saveSvg } from './../assets/svg';
 
-function Note({ id, title, body, footer, handleChange, handleDelete, svgColor }) {
+function Note({ id, title, body, footer, edited, handleChange, handleDelete, svgColor }) {
   const [isEditing, setIsEditing] = useState(false);
   
   let content;
@@ -18,7 +18,7 @@ function Note({ id, title, body, footer, handleChange, handleDelete, svgColor })
             style={svgColor}
             name='title'
             value={title}
-            placeholder="Take a note..."
+            placeholder="Title"
             onChange={e => handleChange(e, id)}
           />
         </div>
@@ -46,19 +46,28 @@ function Note({ id, title, body, footer, handleChange, handleDelete, svgColor })
           </button>
         </div>
         <div className='note_title'>
-          <span>{title.length === 0 ? 'Take a note...' : title}</span>
+          {
+            title.length === 0 ? 
+            <span className='empty_note'>Empty note</span>
+            : <span>{title}</span>
+          }
         </div>
         <div className='note_description'>
           <span>{body}</span>
         </div>
         <div className='note_footer'>
-          <span>Edited</span>
+          {
+            edited ? <span>Edited</span> : <span>Created</span>
+          }
           <span>{footer}</span>
-          <div title="Delete note">
-            <button type='button' style={svgColor} onClick={() => handleDelete(id)}>
-              {deleteSvg}
-            </button>
-          </div>
+          <button 
+            title='Delete note'
+            className='delete_note'
+            type='button' 
+            style={svgColor} 
+            onClick={() => handleDelete(id)}
+            >{deleteSvg}
+          </button>
         </div>
       </div>
     )
